@@ -12,7 +12,7 @@ use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(get_args_from_argv);
 
-our $VERSION = '0.01'; # VERSION
+our $VERSION = '0.02'; # VERSION
 
 our %SPEC;
 
@@ -104,7 +104,7 @@ _
     },
     result_naked => 1,
 };
-my $_pa_skip_check_required_args;
+our $_pa_skip_check_required_args;
 sub get_args_from_argv {
     require Getopt::Long;
     require YAML::Syck; $YAML::Syck::ImplicitTyping = 1;
@@ -120,6 +120,8 @@ sub get_args_from_argv {
     $log->tracef("-> get_args_from_argv(), argv=%s", $argv);
 
     my %go_spec;
+
+    $_pa_skip_check_required_args = 0;
 
     my $args = {};
     while (my ($name, $schema) = each %$args_spec) {
@@ -164,13 +166,12 @@ sub get_args_from_argv {
         $go_spec{$k} = $v;
     }
 
-    $_pa_skip_check_required_args = 0;
-
     $log->tracef("GetOptions rule: %s", \%go_spec);
-    Getopt::Long::Configure(
+    my $old_go_opts = Getopt::Long::Configure(
         $strict ? "no_pass_through" : "pass_through",
         "no_ignore_case", "permute");
     my $result = Getopt::Long::GetOptionsFromArray($argv, %go_spec);
+    Getopt::Long::Configure($old_go_opts);
     unless ($result) {
         die Object::BlankStr->new if $strict;
     }
@@ -258,7 +259,7 @@ Sub::Spec::GetArgs::Argv - Get subroutine arguments from command line arguments 
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 SYNOPSIS
 
