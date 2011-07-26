@@ -1,0 +1,108 @@
+NAME
+    Sub::Spec::GetArgs::Argv - Get subroutine arguments from command line
+    arguments (@ARGV)
+
+VERSION
+    version 0.01
+
+SYNOPSIS
+     use Sub::Spec::GetArgs::Argv;
+
+     my $res = get_args_from_argv(argv=>\@ARGV, spec=>$spec, ...);
+
+DESCRIPTION
+    This module provides get_args_from_argv(), which parses command line
+    arguments (@ARGV) into subroutine arguments (%args). This module is used
+    by Sub::Spec::CmdLine.
+
+    This module uses Log::Any for logging framework.
+
+    This module's functions has Sub::Spec specs.
+
+FUNCTIONS
+    None are exported by default, but they are exportable.
+
+  get_args_from_argv(%args) -> RESULT
+    Get subroutine arguments (%args) from command-line arguments (@ARGV).
+
+    Using information in sub spec's ~args~ clause, parse command line
+    arguments ~@argv~ into hash ~%args~, suitable for passing into subs.
+
+    Uses Getopt::Long's GetOptions to parse the result.
+
+    As with GetOptions, this function modifies its ~argv~ argument.
+
+    Why would one use this function instead of using Getopt::Long directly?
+    Among other reasons, we want YAML parsing (ability to pass data
+    structures via command line) and parsing of arg_pos and arg_greedy.
+
+    * How this routine translates the args spec clause
+
+    Bool types can be specified using
+
+    : --argname
+
+    or
+
+    : --noargname
+
+    All the other types can be specified using
+
+    : --argname VALUE
+
+    or
+
+    : --argname=VALUE
+
+    VALUE will be parsed as YAML for nonscalar types.
+
+    This function also takes ~arg_pos~ and ~arg_greedy~ type clause in
+    schema into account, for example:
+
+    : $SPEC{multiply2} = { : summary => 'Multiply 2 numbers (a & b)', : args
+    => { : a => ['num*' => {arg_pos=>0}], : b => ['num*' => {arg_pos=>1}], :
+    } : }
+
+    then on the command-line any of below is valid:
+
+    : % multiply2 --a 2 --b 3 : % multiply2 2 --b 3; # first non-option
+    argument is fed into a (arg_pos=0) : % multiply2 2 3; # first argument
+    is fed into a, second into b (arg_pos=1)
+
+    Arguments ("*" denotes required arguments):
+
+    *   argv* => *array*
+
+    *   extra_getopts => *hash*
+
+        Specify extra Getopt::Long specification.
+
+        If specified, add extra Getopt::Long specification (as long as it
+        doesn't clash with spec arg). This is used, for example, by
+        Sub::Spec::CmdLine::run() to add general options --help, --version,
+        --list, etc so it can mixed with spec arg options, for convenience.
+
+    *   spec* => *hash*
+
+    *   strict => *bool* (default 1)
+
+        Strict mode.
+
+        If set to 0, will still return parsed argv even if there are parsing
+        errors.
+
+FAQ
+SEE ALSO
+    Sub::Spec
+
+    Sub::Spec::CmdLine
+
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2011 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
