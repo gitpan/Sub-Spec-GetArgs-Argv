@@ -3,7 +3,7 @@ NAME
     arguments (@ARGV)
 
 VERSION
-    version 0.02
+    version 0.03
 
 SYNOPSIS
      use Sub::Spec::GetArgs::Argv;
@@ -56,8 +56,16 @@ FUNCTIONS
 
     VALUE will be parsed as YAML for nonscalar types.
 
-    This function also takes ~arg_pos~ and ~arg_greedy~ type clause in
-    schema into account, for example:
+    Argument aliases (~arg_aliases~) clause for each argument is also
+    parsed. For example:
+
+    : args => { : argname => [bool => { : summary => '...', : arg_aliases =>
+    { : a => {}, : arg => {}, : }, : } : }
+
+    Then -a and --arg are also available in addition to --argname.
+
+    This function also (using [[cpanmod:Sub::Spec::GetArgs::Array]]) groks
+    ~arg_pos~ and ~arg_greedy~ type clause, for example:
 
     : $SPEC{multiply2} = { : summary => 'Multiply 2 numbers (a & b)', : args
     => { : a => ['num*' => {arg_pos=>0}], : b => ['num*' => {arg_pos=>1}], :
@@ -89,7 +97,10 @@ FUNCTIONS
         Strict mode.
 
         If set to 0, will still return parsed argv even if there are parsing
-        errors.
+        errors. If set to 1 (the default), will die upon error.
+
+        Normally you would want to use strict mode, for more error checking.
+        Setting off strict is used by, for example, Sub::Spec::BashComplete.
 
 FAQ
 SEE ALSO

@@ -17,15 +17,17 @@ my %module_build_args = (
     'Steven Haryanto <stevenharyanto@gmail.com>'
   ],
   'dist_name' => 'Sub-Spec-GetArgs-Argv',
-  'dist_version' => '0.02',
+  'dist_version' => '0.03',
   'license' => 'perl',
   'module_name' => 'Sub::Spec::GetArgs::Argv',
   'recommends' => {},
   'recursive_test_files' => 1,
   'requires' => {
+    'Data::Clone' => '0',
     'Log::Any' => '0',
-    'Object::BlankStr' => '0',
+    'Object::BlankStr' => '0.03',
     'Sub::Spec' => '0.13',
+    'Sub::Spec::GetArgs::Array' => '0',
     'Test::More' => '0.96',
     'YAML::Syck' => '0',
     'perl' => '5.010000'

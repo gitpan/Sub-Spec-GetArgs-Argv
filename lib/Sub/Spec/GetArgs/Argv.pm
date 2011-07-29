@@ -6,13 +6,14 @@ use warnings;
 use Log::Any '$log';
 
 use Object::BlankStr;
+use Sub::Spec::GetArgs::Array qw(get_args_from_array);
 use Sub::Spec::Utils; # temp, for _parse_schema
 
 use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(get_args_from_argv);
 
-our $VERSION = '0.02'; # VERSION
+our $VERSION = '0.03'; # VERSION
 
 our %SPEC;
 
@@ -57,8 +58,23 @@ or
 
 VALUE will be parsed as YAML for nonscalar types.
 
-This function also takes ~arg_pos~ and ~arg_greedy~ type clause in schema into
-account, for example:
+Argument aliases (~arg_aliases~) clause for each argument is also parsed. For
+example:
+
+: args => {
+:     argname => [bool => {
+:         summary => '...',
+:         arg_aliases => {
+:             a => {},
+:             arg => {},
+:         },
+:     }
+: }
+
+Then -a and --arg are also available in addition to --argname.
+
+This function also (using [[cpanmod:Sub::Spec::GetArgs::Array]]) groks ~arg_pos~
+and ~arg_greedy~ type clause, for example:
 
 : $SPEC{multiply2} = {
 :     summary => 'Multiply 2 numbers (a & b)',
@@ -85,7 +101,11 @@ _
             summary => 'Strict mode',
             description => <<'_',
 
-If set to 0, will still return parsed argv even if there are parsing errors.
+If set to 0, will still return parsed argv even if there are parsing errors. If
+set to 1 (the default), will die upon error.
+
+Normally you would want to use strict mode, for more error checking. Setting off
+strict is used by, for example, Sub::Spec::BashComplete.
 
 _
             default => 1,
@@ -177,32 +197,25 @@ sub get_args_from_argv {
     }
 
     # process arg_pos
-  ARGV:
-    for my $i (reverse 0..@$argv-1) {
-        while (my ($name, $schema) = each %$args_spec) {
-            my $ah0 = $schema->{attr_hashes}[0];
-            my $o = $ah0->{arg_pos};
-            if (defined($o) && $o == $i) {
-                if (defined($args->{$name})) {
+    if (@$argv) {
+        my $res = get_args_from_array(
+            array=>$argv, _args_spec=>$args_spec,
+        );
+        if ($res->[0] != 200 && $strict) {
+            die "Error: $res->[0] - $res->[1]\n";
+        } elsif ($res->[0] == 200) {
+            my $pos_args = $res->[2];
+            for my $name (keys %$pos_args) {
+                # should've been exists(), but currently uses defined()
+                # because our Getopt::Long assigns undef to all opts
+                if (defined $args->{$name}) {
                     die "You specified option --$name but also argument #".
-                        ($i+1)."\n" if $strict;
+                        $args_spec->{$name}{attr_hashes}[0]{arg_pos}
+                            if $strict;
                 }
-                if ($ah0->{arg_greedy}) {
-                    $args->{$name} = [splice(@$argv, $i)];
-                    my $j = $i;
-                    last ARGV;
-                } else {
-                    $args->{$name} = splice(@$argv, $i, 1);
-                }
+                $args->{$name} = $pos_args->{$name};
             }
         }
-    }
-
-    #$log->tracef("tmp args result (after arg_pos processing): %s, argv: %s",
-    #             $args, $argv);
-    if (@$argv) {
-        die "Error: extra argument(s): ".join(", ", @$argv)."\n"
-            if $strict;
     }
 
     # check required args & parse yaml/etc
@@ -259,7 +272,7 @@ Sub::Spec::GetArgs::Argv - Get subroutine arguments from command line arguments 
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
@@ -317,8 +330,23 @@ or
 
 VALUE will be parsed as YAML for nonscalar types.
 
-This function also takes ~arg_pos~ and ~arg_greedy~ type clause in schema into
-account, for example:
+Argument aliases (~arg_aliases~) clause for each argument is also parsed. For
+example:
+
+: args => {
+:     argname => [bool => {
+:         summary => '...',
+:         arg_aliases => {
+:             a => {},
+:             arg => {},
+:         },
+:     }
+: }
+
+Then -a and --arg are also available in addition to --argname.
+
+This function also (using [[cpanmod:Sub::Spec::GetArgs::Array]]) groks ~arg_pos~
+and ~arg_greedy~ type clause, for example:
 
 : $SPEC{multiply2} = {
 :     summary => 'Multiply 2 numbers (a & b)',
@@ -355,7 +383,11 @@ options, for convenience.
 
 Strict mode.
 
-If set to 0, will still return parsed argv even if there are parsing errors.
+If set to 0, will still return parsed argv even if there are parsing errors. If
+set to 1 (the default), will die upon error.
+
+Normally you would want to use strict mode, for more error checking. Setting off
+strict is used by, for example, Sub::Spec::BashComplete.
 
 =back
 
