@@ -18,11 +18,11 @@ requires:
   Log::Any: 0
   Object::BlankStr: 0.03
   Sub::Spec: 0.13
-  Sub::Spec::GetArgs::Array: 0
+  Sub::Spec::GetArgs::Array: 0.02
   Test::More: 0.96
   YAML::Syck: 0
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Sub-Spec-GetArgs-Argv/
   repository: http://github.com/sharyanto/perl-Sub-Spec-GetArgs-Argv
-version: 0.03
+version: 0.04

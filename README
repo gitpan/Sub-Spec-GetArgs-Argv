@@ -3,7 +3,7 @@ NAME
     arguments (@ARGV)
 
 VERSION
-    version 0.03
+    version 0.04
 
 SYNOPSIS
      use Sub::Spec::GetArgs::Argv;
@@ -38,23 +38,29 @@ FUNCTIONS
 
     * How this routine translates the args spec clause
 
-    Bool types can be specified using
+    Bool types can be specified using:
 
-    : --argname
-
-    or
-
-    : --noargname
-
-    All the other types can be specified using
-
-    : --argname VALUE
+    : --ARGNAME
 
     or
 
-    : --argname=VALUE
+    : --noARGNAME
 
-    VALUE will be parsed as YAML for nonscalar types.
+    All the other types can be specified using:
+
+    : --ARGNAME VALUE
+
+    or
+
+    : --ARGNAME=VALUE
+
+    VALUE will be parsed as YAML for nonscalar types (hash, array). If you
+    want to force YAML parsing for scalar types (e.g. when you want to
+    specify undef, *~* in YAML) you can use:
+
+    : --ARGNAME-yaml=VALUE
+
+    but you need to set *per_arg_yaml* to true.
 
     Argument aliases (~arg_aliases~) clause for each argument is also
     parsed. For example:
@@ -89,6 +95,15 @@ FUNCTIONS
         doesn't clash with spec arg). This is used, for example, by
         Sub::Spec::CmdLine::run() to add general options --help, --version,
         --list, etc so it can mixed with spec arg options, for convenience.
+
+    *   per_arg_yaml => *bool* (default 0)
+
+        Whether to recognize --ARGNAME-yaml.
+
+        This is useful for example if you want to specify a value which is
+        not expressible from the command-line, like *undef*.
+
+        : script.pl --name-yaml '~'
 
     *   spec* => *hash*
 
