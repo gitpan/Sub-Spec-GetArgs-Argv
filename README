@@ -3,7 +3,7 @@ NAME
     arguments (@ARGV)
 
 VERSION
-    version 0.04
+    version 0.05
 
 SYNOPSIS
      use Sub::Spec::GetArgs::Argv;
@@ -11,7 +11,7 @@ SYNOPSIS
      my $res = get_args_from_argv(argv=>\@ARGV, spec=>$spec, ...);
 
 DESCRIPTION
-    This module provides get_args_from_argv(), which parses command line
+    This module provides "get_args_from_argv()", which parses command line
     arguments (@ARGV) into subroutine arguments (%args). This module is used
     by Sub::Spec::CmdLine.
 
@@ -86,6 +86,8 @@ FUNCTIONS
     Arguments ("*" denotes required arguments):
 
     *   argv* => *array*
+
+        If not specified, defaults to @ARGV
 
     *   extra_getopts => *hash*
 

@@ -13,7 +13,7 @@ use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(get_args_from_argv);
 
-our $VERSION = '0.04'; # VERSION
+our $VERSION = '0.05'; # VERSION
 
 our %SPEC;
 
@@ -99,6 +99,7 @@ then on the command-line any of below is valid:
 _
     args => {
         argv => ['array*' => {
+            description => 'If not specified, defaults to @ARGV',
             of => 'str*',
         }],
         spec => ['hash*' => {
@@ -151,7 +152,7 @@ sub get_args_from_argv {
     require YAML::Syck; $YAML::Syck::ImplicitTyping = 1;
 
     my %input_args = @_;
-    my $argv      = $input_args{argv} or return [400, "Please specify argv"];
+    my $argv      = $input_args{argv} // \@ARGV;
     my $sub_spec  = $input_args{spec} or return [400, "Please specify spec"];
     my $args_spec = $sub_spec->{args} // {};
     $args_spec    = { map { $_ => _parse_schema($args_spec->{$_}) }
@@ -195,7 +196,7 @@ sub get_args_from_argv {
                 };
             }
         }
-        my $aliases = $schema->{attr_hashes}[0]{arg_aliases};
+        my $aliases = $schema->{clause_sets}[0]{arg_aliases};
         if ($aliases) {
             while (my ($alias, $alinfo) = each %$aliases) {
                 my $opt;
@@ -218,9 +219,17 @@ sub get_args_from_argv {
         }
     }
 
-    while (my ($k, $v) = each %$extra_go) {
-        my $k_ = $k; $k_ =~ s/-/_/g;
-        next if $go_spec{$k} || $go_spec{"--$k"} || $args_spec->{$k_};
+    # while we already handle arg/--arg and arg=s/arg! variation, we still
+    # haven't covered 'arg|alias' case
+    while (my ($k0, $v) = each %$extra_go) {
+        my $k  = $k0; $k  =~ s/(.+)(?:=.+|!)/$1/; $k =~ s/^-+//;
+        my $k_ = $k ; $k_ =~ s/-/_/g;
+        if ($args_spec->{$k_} ||
+                grep {/^(?:--)?\Q$k\E(?:=|!|\z)/} keys %go_spec) {
+            $log->warnf("Extra getopt option %s (%s) clashes with ".
+                            "argument from spec, ignored", $k0, $k_);
+            next;
+        }
         $go_spec{$k} = $v;
     }
 
@@ -246,7 +255,7 @@ sub get_args_from_argv {
             for my $name (keys %$pos_args) {
                 if (exists $args->{$name}) {
                     die "You specified option --$name but also argument #".
-                        $args_spec->{$name}{attr_hashes}[0]{arg_pos}
+                        $args_spec->{$name}{clause_sets}[0]{arg_pos}
                             if $strict;
                 }
                 $args->{$name} = $pos_args->{$name};
@@ -257,7 +266,7 @@ sub get_args_from_argv {
     # check required args & parse yaml/etc
     unless ($_pa_skip_check_required_args) {
         while (my ($name, $schema) = each %$args_spec) {
-            if ($schema->{attr_hashes}[0]{required} &&
+            if ($schema->{clause_sets}[0]{required} &&
                     !exists($args->{$name})) {
                 die "Missing required argument: $name\n" if $strict;
             }
@@ -303,7 +312,7 @@ Sub::Spec::GetArgs::Argv - Get subroutine arguments from command line arguments 
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
@@ -313,9 +322,9 @@ version 0.04
 
 =head1 DESCRIPTION
 
-This module provides get_args_from_argv(), which parses command line arguments
-(@ARGV) into subroutine arguments (%args). This module is used by
-L<Sub::Spec::CmdLine>.
+This module provides C<get_args_from_argv()>, which parses command line
+arguments (C<@ARGV>) into subroutine arguments (C<%args>). This module is used
+by L<Sub::Spec::CmdLine>.
 
 This module uses L<Log::Any> for logging framework.
 
@@ -404,6 +413,8 @@ Arguments (C<*> denotes required arguments):
 =over 4
 
 =item * B<argv>* => I<array>
+
+If not specified, defaults to @ARGV
 
 =item * B<extra_getopts> => I<hash>
 
