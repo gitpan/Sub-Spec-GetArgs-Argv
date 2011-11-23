@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-use Data::Sah::Util;
+use Data::Sah;
 use Object::BlankStr;
 use Sub::Spec::GetArgs::Array qw(get_args_from_array);
 
@@ -13,12 +13,12 @@ use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(get_args_from_argv);
 
-our $VERSION = '0.06'; # VERSION
+our $VERSION = '0.07'; # VERSION
 
 our %SPEC;
 
 sub _parse_schema {
-    Data::Sah::Util::_parse_schema(@_);
+    Data::Sah::normalize_schema($_[0]);
 }
 
 $SPEC{get_args_from_argv} = {
@@ -266,7 +266,7 @@ sub get_args_from_argv {
     # check required args & parse yaml/etc
     unless ($_pa_skip_check_required_args) {
         while (my ($name, $schema) = each %$args_spec) {
-            if ($schema->{clause_sets}[0]{required} &&
+            if ($schema->{clause_sets}[0]{req} &&
                     !exists($args->{$name})) {
                 die "Missing required argument: $name\n" if $strict;
             }
@@ -312,7 +312,7 @@ Sub::Spec::GetArgs::Argv - Get subroutine arguments from command line arguments 
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 

@@ -3,7 +3,7 @@ NAME
     arguments (@ARGV)
 
 VERSION
-    version 0.06
+    version 0.07
 
 SYNOPSIS
      use Sub::Spec::GetArgs::Argv;
