@@ -13,7 +13,7 @@ use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(get_args_from_argv);
 
-our $VERSION = '0.07'; # VERSION
+our $VERSION = '0.08'; # VERSION
 
 our %SPEC;
 
@@ -312,7 +312,7 @@ Sub::Spec::GetArgs::Argv - Get subroutine arguments from command line arguments 
 
 =head1 VERSION
 
-version 0.07
+version 0.08
 
 =head1 SYNOPSIS
 
@@ -321,6 +321,12 @@ version 0.07
  my $res = get_args_from_argv(argv=>\@ARGV, spec=>$spec, ...);
 
 =head1 DESCRIPTION
+
+B<NOTICE>: This module and the L<Sub::Spec> standard is deprecated as of Jan
+2012. L<Rinci> is the new specification to replace Sub::Spec, it is about 95%
+compatible with Sub::Spec, but corrects a few issues and is more generic.
+C<Perinci::*> is the Perl implementation for Rinci and many of its modules can
+handle existing Sub::Spec sub specs.
 
 This module provides C<get_args_from_argv()>, which parses command line
 arguments (C<@ARGV>) into subroutine arguments (C<%args>). This module is used
@@ -462,7 +468,7 @@ Steven Haryanto <stevenharyanto@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Steven Haryanto.
+This software is copyright (c) 2012 by Steven Haryanto.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

@@ -3,7 +3,7 @@ NAME
     arguments (@ARGV)
 
 VERSION
-    version 0.07
+    version 0.08
 
 SYNOPSIS
      use Sub::Spec::GetArgs::Argv;
@@ -11,6 +11,12 @@ SYNOPSIS
      my $res = get_args_from_argv(argv=>\@ARGV, spec=>$spec, ...);
 
 DESCRIPTION
+    NOTICE: This module and the Sub::Spec standard is deprecated as of Jan
+    2012. Rinci is the new specification to replace Sub::Spec, it is about
+    95% compatible with Sub::Spec, but corrects a few issues and is more
+    generic. "Perinci::*" is the Perl implementation for Rinci and many of
+    its modules can handle existing Sub::Spec sub specs.
+
     This module provides "get_args_from_argv()", which parses command line
     arguments (@ARGV) into subroutine arguments (%args). This module is used
     by Sub::Spec::CmdLine.
@@ -129,7 +135,7 @@ AUTHOR
     Steven Haryanto <stevenharyanto@gmail.com>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2011 by Steven Haryanto.
+    This software is copyright (c) 2012 by Steven Haryanto.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.
