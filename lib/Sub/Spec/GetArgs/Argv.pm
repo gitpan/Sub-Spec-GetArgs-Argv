@@ -13,7 +13,7 @@ use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(get_args_from_argv);
 
-our $VERSION = '0.09'; # VERSION
+our $VERSION = '0.10'; # VERSION
 
 our %SPEC;
 
@@ -312,7 +312,7 @@ Sub::Spec::GetArgs::Argv - Get subroutine arguments from command line arguments 
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 SYNOPSIS
 

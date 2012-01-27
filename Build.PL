@@ -17,7 +17,7 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Sub-Spec-GetArgs-Argv",
-  "dist_version" => "0.09",
+  "dist_version" => "0.10",
   "license" => "perl",
   "module_name" => "Sub::Spec::GetArgs::Argv",
   "recommends" => {},
@@ -28,7 +28,7 @@ my %module_build_args = (
     "Log::Any" => 0,
     "Object::BlankStr" => "0.03",
     "Sub::Spec" => "0.15",
-    "Sub::Spec::GetArgs::Array" => "0.03",
+    "Sub::Spec::GetArgs::Array" => "0.07",
     "Test::More" => "0.96",
     "YAML::Syck" => 0,
     "perl" => "5.010000"
