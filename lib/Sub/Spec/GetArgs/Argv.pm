@@ -13,7 +13,7 @@ use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(get_args_from_argv);
 
-our $VERSION = '0.08'; # VERSION
+our $VERSION = '0.09'; # VERSION
 
 our %SPEC;
 
@@ -172,7 +172,7 @@ sub get_args_from_argv {
         my @name = ($name);
         push @name, $name if $name =~ s/_/-/g; # allow --foo_bar and --foo-bar
         for my $name (@name) {
-            if ($schema->{type} eq 'bool') {
+            if ($schema->[0] eq 'bool') {
                 $opt = "$name!";
             } else {
                 $opt = "$name=s";
@@ -185,7 +185,7 @@ sub get_args_from_argv {
             # (exists($opts{foo} == false) and "specified as undef"
             # (exists($opts{foo}) == true but defined($opts{foo}) == false).
             $go_spec{$opt} = sub { $args->{$name[0]} = $_[1] };
-            if ($per_arg_yaml && $schema->{type} ne 'bool') {
+            if ($per_arg_yaml && $schema->[0] ne 'bool') {
                 $go_spec{"$name-yaml=s"} = sub {
                     my $decoded;
                     eval { $decoded = YAML::Syck::Load($_[1]) };
@@ -196,11 +196,11 @@ sub get_args_from_argv {
                 };
             }
         }
-        my $aliases = $schema->{clause_sets}[0]{arg_aliases};
+        my $aliases = $schema->[1]{arg_aliases};
         if ($aliases) {
             while (my ($alias, $alinfo) = each %$aliases) {
                 my $opt;
-                if ($schema->{type} eq 'bool') {
+                if ($schema->[0] eq 'bool') {
                     $opt = "$alias!";
                 } else {
                     $opt = "$alias=s";
@@ -266,12 +266,12 @@ sub get_args_from_argv {
     # check required args & parse yaml/etc
     unless ($_pa_skip_check_required_args) {
         while (my ($name, $schema) = each %$args_spec) {
-            if ($schema->{clause_sets}[0]{req} &&
+            if ($schema->[1]{req} &&
                     !exists($args->{$name})) {
                 die "Missing required argument: $name\n" if $strict;
             }
             my $parse_yaml;
-            my $type = $schema->{type};
+            my $type = $schema->[0];
             # XXX more proper checking, e.g. check any/all recursively for
             # nonscalar types. check base type.
             $log->tracef("name=%s, arg=%s, parse_yaml=%s",
@@ -312,7 +312,7 @@ Sub::Spec::GetArgs::Argv - Get subroutine arguments from command line arguments 
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 SYNOPSIS
 
@@ -339,120 +339,6 @@ This module's functions has L<Sub::Spec> specs.
 =head1 FUNCTIONS
 
 None are exported by default, but they are exportable.
-
-=head2 get_args_from_argv(%args) -> RESULT
-
-
-Get subroutine arguments (%args) from command-line arguments (@ARGV).
-
-Using information in sub spec's ~args~ clause, parse command line arguments
-~@argv~ into hash ~%args~, suitable for passing into subs.
-
-Uses Getopt::Long's GetOptions to parse the result.
-
-As with GetOptions, this function modifies its ~argv~ argument.
-
-Why would one use this function instead of using Getopt::Long directly? Among
-other reasons, we want YAML parsing (ability to pass data structures via command
-line) and parsing of arg_pos and arg_greedy.
-
-* How this routine translates the args spec clause
-
-Bool types can be specified using:
-
-: --ARGNAME
-
-or
-
-: --noARGNAME
-
-All the other types can be specified using:
-
-: --ARGNAME VALUE
-
-or
-
-: --ARGNAME=VALUE
-
-VALUE will be parsed as YAML for nonscalar types (hash, array). If you want to
-force YAML parsing for scalar types (e.g. when you want to specify undef, *~* in
-YAML) you can use:
-
-: --ARGNAME-yaml=VALUE
-
-but you need to set *per_arg_yaml* to true.
-
-Argument aliases (~arg_aliases~) clause for each argument is also parsed. For
-example:
-
-: args => {
-:     argname => [bool => {
-:         summary => '...',
-:         arg_aliases => {
-:             a => {},
-:             arg => {},
-:         },
-:     }
-: }
-
-Then -a and --arg are also available in addition to --argname.
-
-This function also (using [[cpanmod:Sub::Spec::GetArgs::Array]]) groks ~arg_pos~
-and ~arg_greedy~ type clause, for example:
-
-: $SPEC{multiply2} = {
-:     summary => 'Multiply 2 numbers (a & b)',
-:     args => {
-:         a => ['num*' => {arg_pos=>0}],
-:         b => ['num*' => {arg_pos=>1}],
-:     }
-: }
-
-then on the command-line any of below is valid:
-
-: % multiply2 --a 2 --b 3
-: % multiply2 2 --b 3; # first non-option argument is fed into a (arg_pos=0)
-: % multiply2 2 3;     # first argument is fed into a, second into b (arg_pos=1)
-
-Arguments (C<*> denotes required arguments):
-
-=over 4
-
-=item * B<argv>* => I<array>
-
-If not specified, defaults to @ARGV
-
-=item * B<extra_getopts> => I<hash>
-
-Specify extra Getopt::Long specification.
-
-If specified, add extra Getopt::Long specification (as long as it doesn't clash
-with spec arg). This is used, for example, by Sub::Spec::CmdLine::run() to add
-general options --help, --version, --list, etc so it can mixed with spec arg
-options, for convenience.
-
-=item * B<per_arg_yaml> => I<bool> (default C<0>)
-
-Whether to recognize --ARGNAME-yaml.
-
-This is useful for example if you want to specify a value which is not
-expressible from the command-line, like *undef*.
-
-: script.pl --name-yaml '~'
-
-=item * B<spec>* => I<hash>
-
-=item * B<strict> => I<bool> (default C<1>)
-
-Strict mode.
-
-If set to 0, will still return parsed argv even if there are parsing errors. If
-set to 1 (the default), will die upon error.
-
-Normally you would want to use strict mode, for more error checking. Setting off
-strict is used by, for example, Sub::Spec::BashComplete.
-
-=back
 
 =head1 FAQ
 

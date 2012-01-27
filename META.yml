@@ -15,7 +15,7 @@ meta-spec:
 name: Sub-Spec-GetArgs-Argv
 requires:
   Data::Clone: 0
-  Data::Sah: 0
+  Data::Sah: 0.02
   Log::Any: 0
   Object::BlankStr: 0.03
   Sub::Spec: 0.15
@@ -26,4 +26,4 @@ requires:
 resources:
   homepage: http://search.cpan.org/dist/Sub-Spec-GetArgs-Argv/
   repository: http://github.com/sharyanto/perl-Sub-Spec-GetArgs-Argv
-version: 0.08
+version: 0.09

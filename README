@@ -3,7 +3,7 @@ NAME
     arguments (@ARGV)
 
 VERSION
-    version 0.08
+    version 0.09
 
 SYNOPSIS
      use Sub::Spec::GetArgs::Argv;
@@ -27,103 +27,6 @@ DESCRIPTION
 
 FUNCTIONS
     None are exported by default, but they are exportable.
-
-  get_args_from_argv(%args) -> RESULT
-    Get subroutine arguments (%args) from command-line arguments (@ARGV).
-
-    Using information in sub spec's ~args~ clause, parse command line
-    arguments ~@argv~ into hash ~%args~, suitable for passing into subs.
-
-    Uses Getopt::Long's GetOptions to parse the result.
-
-    As with GetOptions, this function modifies its ~argv~ argument.
-
-    Why would one use this function instead of using Getopt::Long directly?
-    Among other reasons, we want YAML parsing (ability to pass data
-    structures via command line) and parsing of arg_pos and arg_greedy.
-
-    * How this routine translates the args spec clause
-
-    Bool types can be specified using:
-
-    : --ARGNAME
-
-    or
-
-    : --noARGNAME
-
-    All the other types can be specified using:
-
-    : --ARGNAME VALUE
-
-    or
-
-    : --ARGNAME=VALUE
-
-    VALUE will be parsed as YAML for nonscalar types (hash, array). If you
-    want to force YAML parsing for scalar types (e.g. when you want to
-    specify undef, *~* in YAML) you can use:
-
-    : --ARGNAME-yaml=VALUE
-
-    but you need to set *per_arg_yaml* to true.
-
-    Argument aliases (~arg_aliases~) clause for each argument is also
-    parsed. For example:
-
-    : args => { : argname => [bool => { : summary => '...', : arg_aliases =>
-    { : a => {}, : arg => {}, : }, : } : }
-
-    Then -a and --arg are also available in addition to --argname.
-
-    This function also (using [[cpanmod:Sub::Spec::GetArgs::Array]]) groks
-    ~arg_pos~ and ~arg_greedy~ type clause, for example:
-
-    : $SPEC{multiply2} = { : summary => 'Multiply 2 numbers (a & b)', : args
-    => { : a => ['num*' => {arg_pos=>0}], : b => ['num*' => {arg_pos=>1}], :
-    } : }
-
-    then on the command-line any of below is valid:
-
-    : % multiply2 --a 2 --b 3 : % multiply2 2 --b 3; # first non-option
-    argument is fed into a (arg_pos=0) : % multiply2 2 3; # first argument
-    is fed into a, second into b (arg_pos=1)
-
-    Arguments ("*" denotes required arguments):
-
-    *   argv* => *array*
-
-        If not specified, defaults to @ARGV
-
-    *   extra_getopts => *hash*
-
-        Specify extra Getopt::Long specification.
-
-        If specified, add extra Getopt::Long specification (as long as it
-        doesn't clash with spec arg). This is used, for example, by
-        Sub::Spec::CmdLine::run() to add general options --help, --version,
-        --list, etc so it can mixed with spec arg options, for convenience.
-
-    *   per_arg_yaml => *bool* (default 0)
-
-        Whether to recognize --ARGNAME-yaml.
-
-        This is useful for example if you want to specify a value which is
-        not expressible from the command-line, like *undef*.
-
-        : script.pl --name-yaml '~'
-
-    *   spec* => *hash*
-
-    *   strict => *bool* (default 1)
-
-        Strict mode.
-
-        If set to 0, will still return parsed argv even if there are parsing
-        errors. If set to 1 (the default), will die upon error.
-
-        Normally you would want to use strict mode, for more error checking.
-        Setting off strict is used by, for example, Sub::Spec::BashComplete.
 
 FAQ
 SEE ALSO
